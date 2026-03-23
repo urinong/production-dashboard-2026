@@ -471,9 +471,78 @@ function renderInsights(){
   certOrder.forEach(c=>{html+='<div class="cert-legend-item"><div class="cert-legend-dot" style="background:#'+certColors[c]+'"></div>'+c+'</div>'});
   html+='</div></div>';
 
-  // === 3. Category-Product Map ===
+  // === 3. Category-Product Map with Sub-classification ===
+  const subClassify={
+    '채소':{
+      '엽채류(잎채소)':['상추','배추','시금치','쑥갓','깻잎','케일','청경채','양배추','갓','청갓','근대','아욱','얼갈이배추','열무','모듬쌈','쌈채소','치커리','배추봄동','단배추','토종배추','통배추','모듬쌈채','호박잎','얼갈이','가을배추','단배추','모듬쌈채','봄동','곰보배추','민들레잎'],
+      '과채류(열매채소)':['고추','건고추','풋고추','청양고추','고춧가루','건고춧가루','고춧(가루)','고추건고추','오이','호박','단호박','가지','토마토','피망','파프리카','수박','메론','딸기','여주','수세미','노각오이','호박늙은','호박풋','호박늙은호박','미니단호박','단호박(미니)','단호박(미니밤)','단호박(미니밤_','토마토(대추)','토마토(에그)','토마토(대추방울)','토마토(완숙)','가지고추','옥수수','옥수수검정찰'],
+      '근채류(뿌리채소)':['감자','고구마','마늘','생강','우엉','당근','무','무우','연근','도라지','더덕','토란','인삼','산양삼','울금','강황','인디안감자','단마','알타리','알타리무','봄무','봄당근','가을무','가을당근','작약','마늘(홍산)','산더덕','자색양파'],
+      '양념채소':['대파','쪽파','부추','양파','달래','마늘쫑','산초','제피순','마늘잎','올마늘','파','마늘/다래','대파,쪽파','마늘풋마늘'],
+      '산나물류':['고사리','두릅','취나물','엄나무순','곰취','머위','명이나물','곤드레','냉이','방풍나물','참죽순','산마늘','산나물류','두릅순','참가죽순','엄나무','참죽나무순','엄나무순','산나물류(두릅외)','두릅(땅)','산마늘,눈개승마','고사리,드릅,곰취','더덕,도라지,황기','머위순','참 취','머 위','가죽','산나무 고사리','참가죽순','두릅순,엄나무순','메밀순나물'],
+      '버섯류':['표고버섯','생표고','건표고','느타리','목이버섯','노루궁뎅이버섯','송고버섯','버섯','생표고버섯','버섯느타리','표고버섯(깍뚝)','표고버섯(원형)','표고버섯(슬라이스)','(건)표고'],
+      '건나물·건채소':['(건)고사리','무말랭이','호박말림','시래기','건가지','고사리(건)','가죽나물(건)','도라지(건)','더덕(건)','취나물(건)','건고사리','무청'],
+      '콩·두류':['콩','콩나물','콩나물콩','들깨','참깨','백태','피완두콩','쥐눈이콩','유월콩','들깨,콩,녹두','팥,들깨,방풍'],
+    },
+    '과수':{
+      '사과':['사과','사과즙'],
+      '배':['배','배조생','배만생','배그린배','돌배'],
+      '감류':['감','단감','떫은감','대봉감','곶감','감말랭이','곶감,감말랭이','대봉','떪은감'],
+      '복숭아·자두':['복숭아','자두','살구','자두살구','플럼코트 복숭아','개복숭아','대석','포무사'],
+      '포도':['포도','청포도','포도(청)'],
+      '베리류':['블루베리','아로니아','오미자','오디/초코베리','꾸지뽕','블루베리/블루퀸 등 3종'],
+      '핵과·견과':['밤','호두','대추','매실','산수유','모과','매 실','은행','마가목'],
+      '열대·기타과일':['무화과','참다래','다래','포포','참외','체리','딸기','수박','방울토마토','대추방울토마토','메론','복수박','뽕나무'],
+      '과일가공':['블루베리즙','무화과말랭이','꾸지뽕차','반건조꾸지뽕 열매','포도(즙)','매실(청)','블루베리500g','사과즙'],
+    },
+    '주잡곡':{
+      '쌀·벼':['메벼','벼','찰벼','벼찰벼','흑미','적미','쌀','발아현미','발아녹미','발아삼색미','발아오색미','발아적미','발아찹쌀현미','발아찰현미','발아흑미','오색찹쌀','누룽지쌀','벼기타유색미','벼흑미','벼찰흑벼','벼홍미','메벼(만생)','백미,찹쌀,현미','고대미영양잡곡쌀','고대미잡곡쌀','수수쌀'],
+      '잡곡':['보리','밀','메밀','기장','차조','수수','찰수수','율무','귀리','호밀','밀/메밀'],
+      '콩류':['콩','서리태','메주콩','백태','콩나물콩','콩백태','콩서리태','녹두','콩완두','콩호랑이콩','콩호랑이콩깍지','완두콩','서리콩','흰콩','콩작두콩','들깨,서리태'],
+      '깨·유지':['깨','참깨','들깨','땅콩','깨참깨','참깨/들깨/고추','고추/들깨','호두/들깨/참깨'],
+    },
+    '가공':{
+      '장류':['간장','된장','고추장','메주','알메주','한식간장','산된장','청국장','막장가루','메주가루(고추장샘)','메주가루(막장용)','고추장샘','간장(콩)','된장(콩)','오곡조청고추장','마늘고추장','풀의정','갈대청국장가루','청국장가루','검은콩청국장가루','청국장(콩)','청국장찌게200g','청국장찌게500g'],
+      '장아찌·김치':['배추김치','깍두기','열무얼갈이김치','절임배추','무말랭이김치','마늘장아찌','고추장아찌','명이장아찌','순무장아찌','깻잎장아찌','곰취장아찌','죽순장아찌','궁채장아찌','부추장아찌','쪽파장아찌','셀러리장아찌','장아찌혼합장','마늘쫑장아지','비비추장아찌','참죽고추장장아찌','참죽 고추장 자반','꾸지뽕자아찌','오이지(오이)','토종배추 곤짠지'],
+      '즙·음료':['배즙','사과즙','도라지배즙','더덕도라지배즙','호박즙','블루베리즙','민들레즙','돌배즙','칡즙','양배추즙','토마토즙','자색양파즙','석류오미자즙','수세미배즙','야채수','수정과','블루베리즙,잼','하늘향기500ml','하늘향기1000ml'],
+      '식초·효소':['감식초','사과식초','현미식초','식초','식초(현미)','산야초효소','쑥효소','오디효소','유기농 감식초','감식초(감)','현미효소(만년의힘)'],
+      '차류':['작두콩차','보리차','현미차','녹차','생강차','울금차','돼지감자차','둥굴레차','캐모마일차','표고버섯차','무말랭이차','무잎차','블랙보리차','비트차','옥수수차','콜라비차','콩비지차','둥굴레','고욤감잎차','고욤잎차','아마란스차','발효현미차','적미통차','현미통차','흑미통차','작두콩티백','녹차티백','녹차(가루)','녹차(대작)','녹차(발효차)','녹차(세작)','녹차(우전)','녹차(중작)','녹차선물세트','토종배추 뿌리차','박하'],
+      '청·시럽·조청':['생강청','대추청','황매실액','현미조청','오곡조청','수수조청','쌀조청','쌀물엿','쌀엿','곡물당','곡물당딸기쨈','남다른생강청','홍도라지청','발효생강','요리생강','딸기잼'],
+      '분말·가루':['미숫가루','쌀가루','녹두가루','단호박가루','찹쌀가루','현미찹쌀가루','콩가루','표고버섯분말','울금분말','울금분말/강황분말','꾸지뽕가루','작두콩분말','발아오색미숫가루','발아현미쌀가루','볶은귀리가루','무설탕고구마라떼','강황라이스','비트라이스'],
+      '환':['상추환','새싹보리환','양배추환','울금환','작두콩환','강옥환','고소애환','고소애환스틱'],
+      '진액·엑기스':['꾸지뽕진액','헛개진액','헛개녹용액골드','익모초액','민들레진액','쑥진액','개똥쑥진액','구지뽕진액'],
+      '기름':['참기름','들기름'],
+      '수산가공':['다시마','미역','김','김(유기농김)','톳','파래','매생이','멸치','새우','까나리','황태','굴비','간고등어','꽃게','꽃게간장','새우장','전복장'],
+      '젓갈·액젓':['멸치젓','멸치액젓','갈치속젓','갈치액젓','새우젓','새우젓김장','새우젓무침','새우젓북새우','새우젓육젓','새우젓(참젓)','새우젓(육젓)','황석어젓','어간장'],
+      '유제품':['딸기요구르트','사과요구르트','플레인요구르트','초코우유','유제품','우리밀고추장밀키트'],
+      '제과·스낵':['현미강정','김부각','새송이부각','고추부각','현미튀밥','7뻥스낵','참죽다섯가지곡물스낵','하수오다섯가지곡물스낵','약도라지다섯가지 곡물스낵','홍삼다섯가지 곡물스낵','볶은귀리','참고소애누룽지','꽃벵이'],
+      '면류':['메밀국수','백밀국수','통밀국수','수제비(숙면)','부침가루','튀김가루','밀/통밀가루'],
+      '빵·떡':['현미쌀빵','녹두전'],
+      '두부·콩가공':['두부','청국장가루','검은콩청국장가루'],
+      '양봉·꿀':['양봉','꿀','프로폴리스','벌꿀','꿀'],
+      '소금':['소금','장맛소금','칫솔에소금'],
+    },
+    '축산':{
+      '육류':['한우','돼지','육계/삼계'],
+      '달걀':['유정란','계란','유정란(청란)'],
+      '양봉·꿀':['벌꿀','아카시아꿀','잡화꿀','야생화꿀','꿀','로얄제리'],
+    },
+    '수산':{
+      '해조류':['미역100g','미역200g','미역','다시마200g','다시마(씻어말린잎)','다시마분말200g','다시마알250g','다시마알500g'],
+    },
+  };
+
+  function getSubClass(cat, productName){
+    const subs=subClassify[cat];
+    if(!subs)return '기타';
+    for(const[subName,items] of Object.entries(subs)){
+      if(items.some(item=>productName===item||productName.includes(item)||item.includes(productName)))return subName;
+    }
+    return '기타';
+  }
+
   const catProducts={};
   const catCounts={};
+  const catSubProducts={};
   DATA.forEach(r=>{
     const c=normCat(g(r,'품목별'));
     const p=g(r,'생산품목');
@@ -481,30 +550,43 @@ function renderInsights(){
     if(!catProducts[c])catProducts[c]={};
     catProducts[c][p]=(catProducts[c][p]||0)+1;
     catCounts[c]=(catCounts[c]||0)+1;
+    const sub=getSubClass(c,p);
+    if(!catSubProducts[c])catSubProducts[c]={};
+    if(!catSubProducts[c][sub])catSubProducts[c][sub]={};
+    catSubProducts[c][sub][p]=(catSubProducts[c][sub][p]||0)+1;
   });
   const catColors2={'가공':'7c5c3a','과수':'8b3a3a','채소':'2d6a3f','주잡곡':'6b5b1e','축산':'5a3d6b','수산':'1e5a6b','기타':'6b6b6b'};
   const catBgColors={'가공':'f5ede4','과수':'fbe9e9','채소':'e4f2e9','주잡곡':'f5f0dc','축산':'f0e8f5','수산':'e0f0f5','기타':'f0f0f0'};
-  const catOrder2=['채소','가공','주잡곡','과수','축산','수산','기타'];
+  const catOrder2=['채소','과수','주잡곡','가공','축산','수산','기타'];
   
-  html+='<div class="insight-section"><div class="insight-title">품목분류별 생산품목</div><div class="insight-desc">각 품목분류에 속하는 생산품목. 숫자는 등록 건수. 클릭하면 해당 품목의 생산자를 볼 수 있습니다.</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">';
+  html+='<div class="insight-section"><div class="insight-title">품목분류별 생산품목</div><div class="insight-desc">소분류별로 그룹핑된 생산품목. 숫자는 등록 건수. 클릭하면 해당 품목의 생산자를 볼 수 있습니다.</div>';
   
   catOrder2.forEach(cat=>{
-    if(!catProducts[cat])return;
-    const items=Object.entries(catProducts[cat]).sort((a,b)=>b[1]-a[1]);
+    if(!catSubProducts[cat])return;
     const total=catCounts[cat];
+    const totalKinds=Object.keys(catProducts[cat]).length;
     
-    html+='<div style="background:#'+catBgColors[cat]+';border-radius:10px;padding:14px 16px">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
-    html+='<span style="font-weight:600;font-size:14px;color:#'+catColors2[cat]+'">'+cat+'</span>';
-    html+='<span style="font-size:12px;color:#'+catColors2[cat]+';opacity:0.7">'+total+'건 · '+items.length+'종</span></div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
-    items.forEach(([name,cnt])=>{
-      html+='<span onclick="showProductDetail(\''+name.replace(/'/g,"\\'")+'\',\''+cat+'\')" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(255,255,255,0.6);color:#'+catColors2[cat]+';cursor:pointer;transition:all .1s" onmouseover="this.style.background=\'rgba(255,255,255,0.9)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.6)\'">'+name+' <b>'+cnt+'</b></span>';
+    html+='<div style="background:#'+catBgColors[cat]+';border:1px solid rgba(0,0,0,0.06);border-radius:12px;padding:16px 18px;margin-bottom:12px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+    html+='<span style="font-weight:700;font-size:16px;color:#'+catColors2[cat]+'">'+cat+'</span>';
+    html+='<span style="font-size:12px;color:#'+catColors2[cat]+';opacity:0.7">'+total+'건 · '+totalKinds+'종</span></div>';
+    
+    const subOrder=Object.keys(catSubProducts[cat]).filter(s=>s!=='기타');
+    if(catSubProducts[cat]['기타'])subOrder.push('기타');
+    
+    subOrder.forEach(sub=>{
+      const items=Object.entries(catSubProducts[cat][sub]).sort((a,b)=>b[1]-a[1]);
+      const subTotal=items.reduce((s,x)=>s+x[1],0);
+      html+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:#'+catColors2[cat]+';opacity:0.8;margin-bottom:3px">'+sub+' <span style="font-weight:400;opacity:0.6">('+subTotal+'건 · '+items.length+'종)</span></div>';
+      html+='<div style="display:flex;flex-wrap:wrap;gap:3px">';
+      items.forEach(([name,cnt])=>{
+        html+='<span onclick="showProductDetail(\''+name.replace(/'/g,"\\'")+'\',\''+cat+'\')" style="display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;background:rgba(255,255,255,0.55);color:#'+catColors2[cat]+';cursor:pointer;transition:all .1s" onmouseover="this.style.background=\'rgba(255,255,255,0.9)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.55)\'">'+name+' <b>'+cnt+'</b></span>';
+      });
+      html+='</div></div>';
     });
-    html+='</div></div>';
+    html+='</div>';
   });
-  html+='</div></div>';
+  html+='</div>';
 
   // === 4. Producer scale ===
   const prodItems={};
