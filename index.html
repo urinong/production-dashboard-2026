@@ -69,7 +69,7 @@
       <div class="header-meta-item"><strong id="totalDioceses">-</strong>교구</div>
       <div class="header-meta-item"><strong id="totalBranches">-</strong>분회</div>
       <div class="header-meta-item"><strong id="totalProducers">-</strong>생산자</div>
-      <div class="header-meta-item"><strong id="totalCategories">-</strong>품목</div>
+      <div class="header-meta-item"><strong id="totalCategories">-</strong>품목분류</div>
       <div class="header-meta-item"><strong id="totalProducts">-</strong>생산품목</div>
       <div class="header-meta-item"><strong id="totalOrganic">-</strong>유기농</div>
       <div class="header-meta-item"><strong id="totalNoPest">-</strong>무농약</div>
@@ -358,7 +358,45 @@ function renderInsights(){
   certOrder.forEach(c=>{html+='<div class="cert-legend-item"><div class="cert-legend-dot" style="background:#'+certColors[c]+'"></div>'+c+'</div>'});
   html+='</div></div>';
 
-  // === 3. Producer scale ===
+  // === 3. Category-Product Map ===
+  const catProducts={};
+  const catCounts={};
+  DATA.forEach(r=>{
+    const c=normCat(g(r,'품목별'));
+    const p=g(r,'생산품목');
+    if(!c||!p)return;
+    if(!catProducts[c])catProducts[c]={};
+    catProducts[c][p]=(catProducts[c][p]||0)+1;
+    catCounts[c]=(catCounts[c]||0)+1;
+  });
+  const catColors2={'가공':'7c5c3a','과수':'8b3a3a','채소':'2d6a3f','주잡곡':'6b5b1e','축산':'5a3d6b','수산':'1e5a6b','기타':'6b6b6b'};
+  const catBgColors={'가공':'f5ede4','과수':'fbe9e9','채소':'e4f2e9','주잡곡':'f5f0dc','축산':'f0e8f5','수산':'e0f0f5','기타':'f0f0f0'};
+  const catOrder2=['채소','가공','주잡곡','과수','축산','수산','기타'];
+  
+  html+='<div class="insight-section"><div class="insight-title">품목분류별 생산품목</div><div class="insight-desc">각 품목분류에 속하는 대표 생산품목. 숫자는 해당 품목의 등록 건수입니다.</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">';
+  
+  catOrder2.forEach(cat=>{
+    if(!catProducts[cat])return;
+    const items=Object.entries(catProducts[cat]).sort((a,b)=>b[1]-a[1]);
+    const total=catCounts[cat];
+    const topItems=items.slice(0,12);
+    const rest=items.length-12;
+    
+    html+='<div style="background:#'+catBgColors[cat]+';border-radius:10px;padding:14px 16px">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+    html+='<span style="font-weight:600;font-size:14px;color:#'+catColors2[cat]+'">'+cat+'</span>';
+    html+='<span style="font-size:12px;color:#'+catColors2[cat]+';opacity:0.7">'+total+'건 · '+items.length+'종</span></div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
+    topItems.forEach(([name,cnt])=>{
+      html+='<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(255,255,255,0.6);color:#'+catColors2[cat]+'">'+name+' <b>'+cnt+'</b></span>';
+    });
+    if(rest>0)html+='<span style="font-size:11px;color:#'+catColors2[cat]+';opacity:0.6;padding:2px 4px">외 '+rest+'종</span>';
+    html+='</div></div>';
+  });
+  html+='</div></div>';
+
+  // === 4. Producer scale ===
   const prodItems={};
   DATA.forEach(r=>{const k=g(r,'교구')+'_'+g(r,'이름');prodItems[k]=(prodItems[k]||0)+1});
   const counts=Object.values(prodItems);
@@ -370,7 +408,7 @@ function renderInsights(){
     {label:'11품목 이상',min:11,max:999}
   ];
   
-  html+='<div class="insight-section"><div class="insight-title">생산자 규모 분포</div><div class="insight-desc">생산자별 등록 품목 수 분포. 다품목 생산자는 다양한 출하 기회를, 단일품목 생산자는 안정적 공급을 의미합니다.</div>';
+  html+='<div class="insight-section"><div class="insight-title">생산자 규모 분포</div>';
   html+='<div class="producer-dist">';
   dist.forEach(({label,min,max})=>{
     const cnt=counts.filter(c=>c>=min&&c<=max).length;
