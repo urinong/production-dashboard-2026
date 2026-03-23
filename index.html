@@ -143,7 +143,25 @@ const PAGE_SIZE=50;
 function g(r,k){return(r[k]||'').trim()}
 function normCat(v){if(!v)return '';if(v.includes('가공'))return'가공';if(v.includes('과수')||v.includes('과일'))return'과수';if(v.includes('채소'))return'채소';if(v.includes('주')||v.includes('잡곡'))return'주잡곡';if(v.includes('축산')||v.includes('죽산'))return'축산';if(v.includes('수산'))return'수산';return v?'기타':''}
 function normMethod(v){if(!v)return '';if(v.includes('유기가공')||v.includes('유기농')||v==='유기'||v==='유')return'유기농';if(v.toLowerCase().includes('gap'))return'GAP';if(v.includes('무농약')||v.includes('무농'))return'무농약';if(v.includes('무항생'))return'무항생제';if(v.includes('관행'))return'관행';if(v.includes('일반'))return'일반';return'기타'}
-function matchShip(ship,f){if(!ship||!f)return false;if(f==='연중')return ship.includes('연중');const m=parseInt(f);const nums=ship.match(/\d+/g);return nums?nums.some(n=>parseInt(n)===m):false}
+function matchShip(ship,f){
+  if(!ship||!f)return false;
+  if(f==='연중')return ship.includes('연중');
+  if(ship.includes('연중'))return false;
+  const m=parseInt(f);
+  // Check ranges like 6월~8월, 6~8월, 11월~2월
+  const rangeMatch=ship.match(/(\d{1,2})월?\s*~\s*(\d{1,2})월?/);
+  if(rangeMatch){
+    const s=parseInt(rangeMatch[1]),e=parseInt(rangeMatch[2]);
+    if(s<=e){if(m>=s&&m<=e)return true}
+    else{if(m>=s||m<=e)return true}
+  }
+  // Check comma-separated like 3월, 6월, 9월
+  const months=ship.match(/(\d{1,2})월/g);
+  if(months)return months.some(x=>parseInt(x)===m);
+  // Fallback: check plain numbers
+  const nums=ship.match(/\d+/g);
+  return nums?nums.some(n=>parseInt(n)===m):false;
+}
 
 function mapUrl(r){
   let addr = g(r,'지번');
