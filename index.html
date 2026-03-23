@@ -315,17 +315,16 @@ function renderInsights(){
   const avgM=Object.values(monthly).reduce((a,b)=>a+b,0)/12;
   const mNames=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   
-  html+='<div class="insight-section"><div class="insight-title">월별 출하 캘린더</div><div class="insight-desc">전국 기준 월별 출하 가능 품목 수. 진한 색일수록 출하가 집중되는 달입니다. (연중 출하 '+yearround+'건 포함)</div>';
+  html+='<div class="insight-section"><div class="insight-title">월별 출하 캘린더</div><div class="insight-desc">전국 기준 월별 출하 가능 품목 수. 색이 진할수록 출하가 집중됩니다. (연중 출하 '+yearround+'건 포함)</div>';
   html+='<div class="calendar-grid">';
   for(let m=1;m<=12;m++){
-    const v=monthly[m],pct=v/maxM;
-    const intensity=Math.round(40+pct*60);
-    const isHigh=v>avgM*1.3,isLow=v<avgM*0.7;
-    let bg,tc;
-    if(isHigh){bg=`hsl(25,${intensity}%,${85-pct*30}%)`;tc='#7c3a1e'}
-    else if(isLow){bg=`hsl(210,${intensity}%,${90-pct*20}%)`;tc='#1e4a7c'}
-    else{bg=`hsl(140,${intensity}%,${88-pct*25}%)`;tc='#1e5a2d'}
-    html+='<div class="cal-cell" style="background:'+bg+';color:'+tc+'"><div class="cal-month">'+mNames[m-1]+'</div><div class="cal-count">'+v+'</div><div style="font-size:10px">'+(isHigh?'과잉 주의':isLow?'공백 주의':'적정')+'</div></div>';
+    const v=monthly[m];
+    const step=Math.max(0,Math.min(11,Math.round((v-200)/(1000-200)*11)));
+    const light=90-step*5;
+    const sat=25+step*5;
+    const bg='hsl(140,'+sat+'%,'+light+'%)';
+    const tc=step>6?'#ffffff':'#1e3a1e';
+    html+='<div class="cal-cell" style="background:'+bg+';color:'+tc+'"><div class="cal-month">'+mNames[m-1]+'</div><div class="cal-count">'+v+'</div></div>';
   }
   html+='</div></div>';
 
@@ -345,8 +344,8 @@ function renderInsights(){
     const certs={};
     sub.forEach(r=>{const m=normMethod(g(r,'생산방법'));const c=certOrder.includes(m)?m:'기타';certs[c]=(certs[c]||0)+1});
     const total=sub.length;
-    const barWidth=Math.round(total/maxDiocese*100);
-    html+='<div class="cert-row"><span class="cert-label">'+d+'</span><div style="flex:1;display:flex;align-items:center"><div class="cert-bars" style="width:'+barWidth+'%" title="총 '+total+'건">';
+    const barPct=Math.round(total/maxDiocese*100);
+    html+='<div class="cert-row"><span class="cert-label">'+d+'</span><div style="flex:1"><div style="display:flex;height:22px;border-radius:4px;overflow:hidden;width:'+barPct+'%" title="총 '+total+'건">';
     certOrder.forEach(c=>{
       if(!certs[c])return;
       const w=(certs[c]/total*100);
@@ -359,27 +358,7 @@ function renderInsights(){
   certOrder.forEach(c=>{html+='<div class="cert-legend-item"><div class="cert-legend-dot" style="background:#'+certColors[c]+'"></div>'+c+'</div>'});
   html+='</div></div>';
 
-  // === 3. Org shipment ratio ===
-  html+='<div class="insight-section"><div class="insight-title">출하량 대비 조직내출하 비율</div><div class="insight-desc">총생산량 중 조직(우리농) 내로 출하되는 비율. 비율이 낮은 교구는 소비 확대 또는 직거래 기획 기회가 있습니다.</div>';
-  
-  const ratios=[];
-  dioceseOrder.forEach(d=>{
-    const sub=DATA.filter(r=>g(r,'교구')===d);
-    let tp=0,ts=0;
-    sub.forEach(r=>{try{tp+=parseFloat(g(r,'총생산량').replace(/,/g,''))}catch(e){}try{ts+=parseFloat(g(r,'조직내출하량').replace(/,/g,''))}catch(e){}});
-    const pct=tp>0?ts/tp*100:0;
-    ratios.push({d,tp,ts,pct});
-  });
-  ratios.sort((a,b)=>b.pct-a.pct);
-  
-  ratios.forEach(({d,tp,ts,pct})=>{
-    const barColor=pct>40?'#2C5F2D':pct>20?'#B8953A':tp>0?'#B85042':'#cccccc';
-    const detail=tp>0?'생산 '+Math.round(tp).toLocaleString()+' / 출하 '+Math.round(ts).toLocaleString():'데이터 없음';
-    html+='<div class="ratio-card"><span class="ratio-diocese">'+d+'</span><div class="ratio-bar-wrap"><div class="ratio-bar-fill" style="width:'+Math.min(pct,100)+'%;background:'+barColor+'"></div></div><span class="ratio-pct" style="color:'+barColor+'">'+Math.round(pct)+'%</span><span class="ratio-detail">'+detail+'</span></div>';
-  });
-  html+='</div>';
-
-  // === 4. Producer scale ===
+  // === 3. Producer scale ===
   const prodItems={};
   DATA.forEach(r=>{const k=g(r,'교구')+'_'+g(r,'이름');prodItems[k]=(prodItems[k]||0)+1});
   const counts=Object.values(prodItems);
