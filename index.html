@@ -578,10 +578,10 @@ function renderInsights(){
     subOrder.forEach(sub=>{
       const items=Object.entries(catSubProducts[cat][sub]).sort((a,b)=>b[1]-a[1]);
       const subTotal=items.reduce((s,x)=>s+x[1],0);
-      html+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:#'+catColors2[cat]+';opacity:0.8;margin-bottom:3px">'+sub+' <span style="font-weight:400;opacity:0.6">('+subTotal+'건 · '+items.length+'종)</span></div>';
-      html+='<div style="display:flex;flex-wrap:wrap;gap:3px">';
+      html+='<div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:#'+catColors2[cat]+';opacity:0.8;margin-bottom:4px">'+sub+' <span style="font-weight:400;opacity:0.6">('+subTotal+'건 · '+items.length+'종)</span></div>';
+      html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
       items.forEach(([name,cnt])=>{
-        html+='<span onclick="showProductDetail(\''+name.replace(/'/g,"\\'")+'\',\''+cat+'\')" style="display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;background:rgba(255,255,255,0.55);color:#'+catColors2[cat]+';cursor:pointer;transition:all .1s" onmouseover="this.style.background=\'rgba(255,255,255,0.9)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.55)\'">'+name+' <b>'+cnt+'</b></span>';
+        html+='<span onclick="showProductDetail(\''+name.replace(/'/g,"\\'")+'\',\''+cat+'\')" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;background:rgba(255,255,255,0.55);color:#'+catColors2[cat]+';cursor:pointer;transition:all .1s" onmouseover="this.style.background=\'rgba(255,255,255,0.9)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.55)\'">'+name+' <b>'+cnt+'</b></span>';
       });
       html+='</div></div>';
     });
