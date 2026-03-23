@@ -87,9 +87,9 @@
   <div id="tableView">
     <div class="toolbar">
       <div class="search-box"><input type="text" id="searchInput" placeholder="이름, 품목, 지역 등 검색..." oninput="applyFilters()"></div>
-      <select class="filter-select" id="filterCategory" onchange="applyFilters()"><option value="">품목별 전체</option><option value="가공">가공</option><option value="과수">과수</option><option value="채소">채소</option><option value="주잡곡">주잡곡</option><option value="축산">축산</option><option value="수산">수산</option></select>
-      <select class="filter-select" id="filterMethod" onchange="applyFilters()"><option value="">생산방법 전체</option><option value="유기농">유기농</option><option value="무농약">무농약</option><option value="GAP">GAP</option><option value="무항생제">무항생제</option><option value="관행">관행</option><option value="일반">일반</option></select>
-      <select class="filter-select" id="filterShipTime" onchange="applyFilters()"><option value="">출하시기 전체</option><option value="연중">연중</option><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
+      <select class="filter-select" id="filterCategory" onchange="applyFilters()"><option value="">품목별 전체</option><option value="가공">가공</option><option value="과수">과수</option><option value="채소">채소</option><option value="주잡곡">주잡곡</option><option value="축산">축산</option><option value="수산">수산</option><option value="기타">기타</option></select>
+      <select class="filter-select" id="filterMethod" onchange="applyFilters()"><option value="">생산방법 전체</option><option value="유기농">유기농</option><option value="무농약">무농약</option><option value="GAP">GAP</option><option value="무항생제">무항생제</option><option value="관행">관행</option><option value="일반">일반</option><option value="기타">기타</option></select>
+      <select class="filter-select" id="filterShipTime" onchange="applyFilters()"><option value="">출하시기 전체</option><option value="연중">연중</option><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option><option value="기타">기타</option></select>
       <button class="btn-reset" onclick="resetFilters()">초기화</button>
       <button class="btn-refresh" onclick="loadData()">새로고침</button>
       <span class="result-count" id="resultCount"></span>
@@ -108,10 +108,11 @@
         <th onclick="sortBy('인증기간(연차)')">인증연차 <span class="sort-arrow">↕</span></th>
         <th onclick="sortBy('총생산량')">총생산량 <span class="sort-arrow">↕</span></th>
         <th onclick="sortBy('조직내출하량')">조직내출하량 <span class="sort-arrow">↕</span></th>
+        <th onclick="sortBy('출하량단위')">단위 <span class="sort-arrow">↕</span></th>
         <th onclick="sortBy('출하시기')">출하시기 <span class="sort-arrow">↕</span></th>
         <th>비고</th>
       </tr></thead>
-      <tbody id="tableBody"><tr><td colspan="14"><div class="loading"><div class="loading-spinner"></div><div class="loading-text">구글 시트에서 데이터를 불러오는 중...</div></div></td></tr></tbody>
+      <tbody id="tableBody"><tr><td colspan="15"><div class="loading"><div class="loading-spinner"></div><div class="loading-text">구글 시트에서 데이터를 불러오는 중...</div></div></td></tr></tbody>
       </table></div><div class="pagination" id="pagination"></div></div>
   </div>
   <div id="producerView" style="display:none">
@@ -155,12 +156,12 @@ function mapUrl(r){
 }
 
 function loadData(){
-  document.getElementById('tableBody').innerHTML='<tr><td colspan="14"><div class="loading"><div class="loading-spinner"></div><div class="loading-text">구글 시트에서 데이터를 불러오는 중...</div></div></td></tr>';
+  document.getElementById('tableBody').innerHTML='<tr><td colspan="15"><div class="loading"><div class="loading-spinner"></div><div class="loading-text">구글 시트에서 데이터를 불러오는 중...</div></div></td></tr>';
   let loaded=0;
   function checkDone(){if(++loaded>=2){initUI();applyFilters();const now=new Date();document.getElementById('lastUpdate').textContent='마지막 동기화: '+now.toLocaleDateString('ko-KR')+' '+now.toLocaleTimeString('ko-KR')}}
   Papa.parse(MAIN_URL,{download:true,header:true,skipEmptyLines:true,
     complete:function(r){DATA=r.data.filter(d=>g(d,'이름'));checkDone()},
-    error:function(e){document.getElementById('tableBody').innerHTML='<tr><td colspan="14"><div class="error-box">데이터를 불러오지 못했습니다.<br>이 파일은 웹 서버(GitHub Pages 등)에서 열어야 합니다.<br>로컬(file://)에서는 보안 정책으로 구글 시트 연결이 차단됩니다.<br><br>오류: '+e.message+'</div></td></tr>'}
+    error:function(e){document.getElementById('tableBody').innerHTML='<tr><td colspan="15"><div class="error-box">데이터를 불러오지 못했습니다.<br>이 파일은 웹 서버(GitHub Pages 등)에서 열어야 합니다.<br>로컬(file://)에서는 보안 정책으로 구글 시트 연결이 차단됩니다.<br><br>오류: '+e.message+'</div></td></tr>'}
   });
   Papa.parse(PROFILE_URL,{download:true,header:true,skipEmptyLines:true,
     complete:function(r){r.data.forEach(d=>{const id=g(d,'생산자ID');if(id)PROFILES[id]=d});checkDone()},
@@ -199,6 +200,8 @@ function initUI(){
 
 function toggleDiocese(d){activeDiocese=(activeDiocese===d)?'':d;document.querySelectorAll('.summary-card').forEach((c,i)=>{if(i===0)c.classList.toggle('active',!activeDiocese);else c.classList.toggle('active',c.querySelector('.diocese').textContent.trim()===activeDiocese)});applyFilters()}
 
+function isStandardShip(s){if(!s)return true;if(s==='연중')return true;if(/^\d{1,2}월/.test(s))return true;return false}
+
 function applyFilters(){
   const q=document.getElementById('searchInput').value.trim().toLowerCase();
   const cat=document.getElementById('filterCategory').value;
@@ -206,9 +209,9 @@ function applyFilters(){
   const ship=document.getElementById('filterShipTime').value;
   filtered=DATA.filter(r=>{
     if(activeDiocese&&g(r,'교구')!==activeDiocese)return false;
-    if(cat&&normCat(g(r,'품목별'))!==cat)return false;
-    if(method&&normMethod(g(r,'생산방법'))!==method)return false;
-    if(ship&&!matchShip(g(r,'출하시기')+' '+g(r,'출하시기2'),ship))return false;
+    if(cat){const nc=normCat(g(r,'품목별'));if(cat==='기타'){if(nc!=='기타'&&nc!=='')return false}else{if(nc!==cat)return false}}
+    if(method){const nm=normMethod(g(r,'생산방법'));if(method==='기타'){if(nm!=='기타'&&nm!=='')return false}else{if(nm!==method)return false}}
+    if(ship){const sv=g(r,'출하시기');if(ship==='기타'){if(isStandardShip(sv))return false}else if(!matchShip(sv,ship))return false}
     if(q){const hay=(g(r,'이름')+g(r,'생산품목')+g(r,'품종')+g(r,'분회')+g(r,'교구')+g(r,'지번')+g(r,'생산방법')+g(r,'비고_원본')).toLowerCase();if(!hay.includes(q))return false}
     return true;
   });
@@ -220,8 +223,8 @@ function renderTable(){
   const start=(currentPage-1)*PAGE_SIZE,page=filtered.slice(start,start+PAGE_SIZE);
   let html='';
   page.forEach(r=>{const cat=normCat(g(r,'품목별')),d=g(r,'교구');
-    html+='<tr onclick="showDetail(\''+d+'\',\''+g(r,'이름').replace(/'/g,"\\'")+'\')"><td class="text-muted" style="font-size:11px">'+g(r,'생산자ID')+'</td><td><span class="diocese-dot dot-'+d+'"></span>'+d+'</td><td>'+g(r,'분회')+'</td><td class="cell-name">'+g(r,'이름')+'</td><td>'+(cat?'<span class="cat-badge cat-'+cat+'">'+cat+'</span>':'')+'</td><td class="cell-product">'+g(r,'생산품목')+'</td><td class="text-muted">'+(g(r,'품종')||'-')+'</td><td class="text-right">'+(g(r,'면적(㎡)')||'-')+'</td><td>'+(g(r,'생산방법')||'-')+'</td><td class="text-center">'+(g(r,'인증기간(연차)')||'-')+'</td><td class="text-right">'+(g(r,'총생산량')||'-')+'</td><td class="text-right">'+(g(r,'조직내출하량')||'-')+'</td><td>'+(g(r,'출하시기')||'-')+(g(r,'출하시기2')?' ~ '+g(r,'출하시기2'):'')+'</td><td class="text-muted" style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(g(r,'비고_원본').replace(/"/g,'&quot;'))+'">'+(g(r,'비고_원본')||'-')+'</td></tr>'});
-  document.getElementById('tableBody').innerHTML=html||'<tr><td colspan="14" style="text-align:center;padding:30px;color:var(--text-muted)">검색 결과가 없습니다.</td></tr>';renderPagination()}
+    html+='<tr onclick="showDetail(\''+d+'\',\''+g(r,'이름').replace(/'/g,"\\'")+'\')"><td class="text-muted" style="font-size:11px">'+g(r,'생산자ID')+'</td><td><span class="diocese-dot dot-'+d+'"></span>'+d+'</td><td>'+g(r,'분회')+'</td><td class="cell-name">'+g(r,'이름')+'</td><td>'+(cat?'<span class="cat-badge cat-'+cat+'">'+cat+'</span>':'')+'</td><td class="cell-product">'+g(r,'생산품목')+'</td><td class="text-muted">'+(g(r,'품종')||'-')+'</td><td class="text-right">'+(g(r,'면적(㎡)')||'-')+'</td><td>'+(g(r,'생산방법')||'-')+'</td><td class="text-center">'+(g(r,'인증기간(연차)')||'-')+'</td><td class="text-right">'+(g(r,'총생산량')||'-')+'</td><td class="text-right">'+(g(r,'조직내출하량')||'-')+'</td><td class="text-center">'+(g(r,'출하량단위')||'-')+'</td><td>'+(g(r,'출하시기')||'-')+'</td><td class="text-muted" style="font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(g(r,'비고_원본').replace(/"/g,'&quot;'))+'">'+(g(r,'비고_원본')||'-')+'</td></tr>'});
+  document.getElementById('tableBody').innerHTML=html||'<tr><td colspan="15" style="text-align:center;padding:30px;color:var(--text-muted)">검색 결과가 없습니다.</td></tr>';renderPagination()}
 
 function renderPagination(){const total=Math.ceil(filtered.length/PAGE_SIZE),pg=document.getElementById('pagination');if(total<=1){pg.innerHTML='';return}let html='<button class="page-btn" onclick="goPage(1)" '+(currentPage===1?'disabled':'')+'>&laquo;</button><button class="page-btn" onclick="goPage('+(currentPage-1)+')" '+(currentPage===1?'disabled':'')+'>&lsaquo;</button>';let s=Math.max(1,currentPage-3),e=Math.min(total,s+6);if(e-s<6)s=Math.max(1,e-6);for(let i=s;i<=e;i++)html+='<button class="page-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';html+='<button class="page-btn" onclick="goPage('+(currentPage+1)+')" '+(currentPage===total?'disabled':'')+'>&rsaquo;</button><button class="page-btn" onclick="goPage('+total+')" '+(currentPage===total?'disabled':'')+'>&raquo;</button><span class="page-info">'+currentPage+' / '+total+'</span>';pg.innerHTML=html}
 function goPage(p){const total=Math.ceil(filtered.length/PAGE_SIZE);currentPage=Math.max(1,Math.min(total,p));renderTable();document.querySelector('.table-scroll').scrollTop=0}
@@ -262,9 +265,9 @@ function showDetail(diocese,name){
   if(bigos.length)html+='<span class="label">비고</span><span>'+bigos.join(', ')+'</span>';
   html+='</div>';
 
-  html+='<div class="detail-items"><h3>생산 품목 목록</h3><div style="overflow-x:auto"><table style="min-width:auto"><thead><tr><th>품목별</th><th>생산품목</th><th>품종</th><th>면적(㎡)</th><th>생산방법</th><th>총생산량</th><th>출하량</th><th>출하시기</th><th>지번</th></tr></thead><tbody>';
+  html+='<div class="detail-items"><h3>생산 품목 목록</h3><div style="overflow-x:auto"><table style="min-width:auto"><thead><tr><th>품목별</th><th>생산품목</th><th>품종</th><th>면적(㎡)</th><th>생산방법</th><th>총생산량</th><th>출하량</th><th>단위</th><th>출하시기</th><th>지번</th></tr></thead><tbody>';
   items.forEach(it=>{const c=normCat(g(it,'품목별')),addr=g(it,'지번'),mu=addr?mapUrl(it):'';
-    html+='<tr><td>'+(c?'<span class="cat-badge cat-'+c+'">'+c+'</span>':'')+'</td><td class="cell-product">'+g(it,'생산품목')+'</td><td>'+(g(it,'품종')||'-')+'</td><td class="text-right">'+(g(it,'면적(㎡)')||'-')+'</td><td>'+(g(it,'생산방법')||'-')+'</td><td class="text-right">'+(g(it,'총생산량')||'-')+'</td><td class="text-right">'+(g(it,'조직내출하량')||'-')+'</td><td>'+(g(it,'출하시기')||'-')+'</td><td style="font-size:11px">'+(addr?(mu?'<a href="'+mu+'" target="_blank" style="color:var(--accent);text-decoration:underline" title="지도에서 보기">'+addr+'</a>':addr):'-')+'</td></tr>'});
+    html+='<tr><td>'+(c?'<span class="cat-badge cat-'+c+'">'+c+'</span>':'')+'</td><td class="cell-product">'+g(it,'생산품목')+'</td><td>'+(g(it,'품종')||'-')+'</td><td class="text-right">'+(g(it,'면적(㎡)')||'-')+'</td><td>'+(g(it,'생산방법')||'-')+'</td><td class="text-right">'+(g(it,'총생산량')||'-')+'</td><td class="text-right">'+(g(it,'조직내출하량')||'-')+'</td><td class="text-center">'+(g(it,'출하량단위')||'-')+'</td><td>'+(g(it,'출하시기')||'-')+'</td><td style="font-size:11px">'+(addr?(mu?'<a href="'+mu+'" target="_blank" style="color:var(--accent);text-decoration:underline" title="지도에서 보기">'+addr+'</a>':addr):'-')+'</td></tr>'});
   html+='</tbody></table></div></div>';
   document.getElementById('detailPanel').innerHTML=html;document.getElementById('detailOverlay').classList.add('show')}
 function closeDetail(){document.getElementById('detailOverlay').classList.remove('show')}
@@ -329,9 +332,12 @@ function renderInsights(){
   // === 2. Diocese certification ===
   const certColors={'유기농':'2C5F2D','무농약':'4A7A2E','GAP':'3A6CB8','무항생제':'7C5C9A','관행':'B85C3A','일반':'B8953A','기타':'999999'};
   const certOrder=['유기농','무농약','GAP','무항생제','관행','일반','기타'];
-  const dioceseOrder=['광주','마산','부산','안동','의정부','인천','전주','청주','춘천'];
+  const dioceseOrder=['광주','마산','부산','안동','의정부','원주','인천','전주','청주','춘천'];
   
-  html+='<div class="insight-section"><div class="insight-title">교구별 인증 현황</div><div class="insight-desc">교구별 생산방법(인증) 분포. 바의 길이는 해당 교구의 총 품목 수에 비례합니다.</div>';
+  html+='<div class="insight-section"><div class="insight-title">교구별 인증 현황</div><div class="insight-desc">교구별 생산방법(인증) 분포. 막대 길이는 해당 교구의 총 품목 수에 비례합니다.</div>';
+  
+  let maxDiocese=0;
+  dioceseOrder.forEach(d=>{const cnt=DATA.filter(r=>g(r,'교구')===d).length;if(cnt>maxDiocese)maxDiocese=cnt});
   
   dioceseOrder.forEach(d=>{
     const sub=DATA.filter(r=>g(r,'교구')===d);
@@ -339,14 +345,15 @@ function renderInsights(){
     const certs={};
     sub.forEach(r=>{const m=normMethod(g(r,'생산방법'));const c=certOrder.includes(m)?m:'기타';certs[c]=(certs[c]||0)+1});
     const total=sub.length;
-    html+='<div class="cert-row"><span class="cert-label">'+d+'</span><div class="cert-bars" title="총 '+total+'건">';
+    const barWidth=Math.round(total/maxDiocese*100);
+    html+='<div class="cert-row"><span class="cert-label">'+d+'</span><div style="flex:1;display:flex;align-items:center"><div class="cert-bars" style="width:'+barWidth+'%" title="총 '+total+'건">';
     certOrder.forEach(c=>{
       if(!certs[c])return;
       const w=(certs[c]/total*100);
       if(w<2)return;
       html+='<div class="cert-seg" style="width:'+w+'%;background:#'+certColors[c]+'">'+(w>8?certs[c]:'')+'</div>';
     });
-    html+='</div><span style="font-size:11px;color:var(--text-muted);width:40px;text-align:right">'+total+'</span></div>';
+    html+='</div></div><span style="font-size:11px;color:var(--text-muted);width:40px;text-align:right">'+total+'</span></div>';
   });
   html+='<div class="cert-legend">';
   certOrder.forEach(c=>{html+='<div class="cert-legend-item"><div class="cert-legend-dot" style="background:#'+certColors[c]+'"></div>'+c+'</div>'});
@@ -366,9 +373,9 @@ function renderInsights(){
   ratios.sort((a,b)=>b.pct-a.pct);
   
   ratios.forEach(({d,tp,ts,pct})=>{
-    if(!tp)return;
-    const barColor=pct>40?'#2C5F2D':pct>20?'#B8953A':'#B85042';
-    html+='<div class="ratio-card"><span class="ratio-diocese">'+d+'</span><div class="ratio-bar-wrap"><div class="ratio-bar-fill" style="width:'+Math.min(pct,100)+'%;background:'+barColor+'"></div></div><span class="ratio-pct" style="color:'+barColor+'">'+Math.round(pct)+'%</span><span class="ratio-detail">생산 '+Math.round(tp).toLocaleString()+' / 출하 '+Math.round(ts).toLocaleString()+'</span></div>';
+    const barColor=pct>40?'#2C5F2D':pct>20?'#B8953A':tp>0?'#B85042':'#cccccc';
+    const detail=tp>0?'생산 '+Math.round(tp).toLocaleString()+' / 출하 '+Math.round(ts).toLocaleString():'데이터 없음';
+    html+='<div class="ratio-card"><span class="ratio-diocese">'+d+'</span><div class="ratio-bar-wrap"><div class="ratio-bar-fill" style="width:'+Math.min(pct,100)+'%;background:'+barColor+'"></div></div><span class="ratio-pct" style="color:'+barColor+'">'+Math.round(pct)+'%</span><span class="ratio-detail">'+detail+'</span></div>';
   });
   html+='</div>';
 
