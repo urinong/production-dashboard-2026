@@ -419,8 +419,9 @@ function renderInsights(){
   let yearround=0;
   DATA.forEach(r=>{
     const s=g(r,'출하시기');
-    if(s==='연중'){yearround++;for(let m=1;m<=12;m++)monthly[m]++;return}
-    const rm=s.match(/(\d{1,2})월~(\d{1,2})월/);
+    if(!s)return;
+    if(s.includes('연중')){yearround++;for(let m=1;m<=12;m++)monthly[m]++;return}
+    const rm=s.match(/(\d{1,2})월?\s*~\s*(\d{1,2})월?/);
     if(rm){let s1=parseInt(rm[1]),s2=parseInt(rm[2]);if(s1<=s2)for(let m=s1;m<=s2;m++)monthly[m]++;else{for(let m=s1;m<=12;m++)monthly[m]++;for(let m=1;m<=s2;m++)monthly[m]++}return}
     const ms=s.match(/(\d{1,2})월/g);
     if(ms)ms.forEach(x=>{const n=parseInt(x);if(n>=1&&n<=12)monthly[n]++})
