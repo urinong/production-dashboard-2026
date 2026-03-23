@@ -179,7 +179,7 @@ function initUI(){
   row.innerHTML=html;
   const ap=new Set(DATA.map(r=>g(r,'교구')+'_'+g(r,'이름')));
   const aprod=new Set(DATA.map(r=>g(r,'생산품목')).filter(Boolean));
-  const acat=new Set(DATA.map(r=>g(r,'품목별')).filter(Boolean));
+  const acat=new Set(DATA.map(r=>normCat(g(r,'품목별'))).filter(Boolean));
   const abranch=new Set(DATA.map(r=>g(r,'교구')+'_'+g(r,'분회')).filter(x=>!x.endsWith('_')));
   let cOrg=0,cNP=0,cGAP=0,cNA=0;
   DATA.forEach(r=>{const m=normMethod(g(r,'생산방법'));if(m==='유기농')cOrg++;else if(m==='무농약')cNP++;else if(m==='GAP')cGAP++;else if(m==='무항생제')cNA++});
@@ -270,6 +270,39 @@ function showDetail(diocese,name){
     html+='<tr><td>'+(c?'<span class="cat-badge cat-'+c+'">'+c+'</span>':'')+'</td><td class="cell-product">'+g(it,'생산품목')+'</td><td>'+(g(it,'품종')||'-')+'</td><td class="text-right">'+(g(it,'면적(㎡)')||'-')+'</td><td>'+(g(it,'생산방법')||'-')+'</td><td class="text-right">'+(g(it,'총생산량')||'-')+'</td><td class="text-right">'+(g(it,'조직내출하량')||'-')+'</td><td class="text-center">'+(g(it,'출하량단위')||'-')+'</td><td>'+(g(it,'출하시기')||'-')+'</td><td style="font-size:11px">'+(addr?(mu?'<a href="'+mu+'" target="_blank" style="color:var(--accent);text-decoration:underline" title="지도에서 보기">'+addr+'</a>':addr):'-')+'</td></tr>'});
   html+='</tbody></table></div></div>';
   document.getElementById('detailPanel').innerHTML=html;document.getElementById('detailOverlay').classList.add('show')}
+function showProductDetail(product,cat){
+  const items=DATA.filter(r=>g(r,'생산품목')===product);
+  if(!items.length)return;
+  const producers={};
+  items.forEach(r=>{
+    const k=g(r,'교구')+'_'+g(r,'이름');
+    if(!producers[k])producers[k]={교구:g(r,'교구'),분회:g(r,'분회'),이름:g(r,'이름'),id:g(r,'생산자ID'),items:[]};
+    producers[k].items.push(r);
+  });
+  const list=Object.values(producers).sort((a,b)=>a.교구.localeCompare(b.교구,'ko')||a.이름.localeCompare(b.이름,'ko'));
+
+  let html='<button class="detail-close" onclick="closeDetail()">&times;</button>';
+  html+='<h2>'+product+'</h2>';
+  html+='<div class="sub"><span class="cat-badge cat-'+cat+'">'+cat+'</span> · '+list.length+'명 생산자 · '+items.length+'건</div>';
+
+  html+='<div style="overflow-x:auto"><table style="min-width:auto"><thead><tr><th>교구</th><th>분회</th><th>이름</th><th>품종</th><th>면적(㎡)</th><th>생산방법</th><th>총생산량</th><th>출하량</th><th>단위</th><th>출하시기</th></tr></thead><tbody>';
+  items.sort((a,b)=>g(a,'교구').localeCompare(g(b,'교구'),'ko')).forEach(r=>{
+    const d=g(r,'교구');
+    html+='<tr style="cursor:pointer" onclick="closeDetail();setTimeout(()=>showDetail(\''+d+'\',\''+g(r,'이름').replace(/'/g,"\\'")+'\'),100)">';
+    html+='<td><span class="diocese-dot dot-'+d+'"></span>'+d+'</td>';
+    html+='<td>'+g(r,'분회')+'</td>';
+    html+='<td class="cell-name">'+g(r,'이름')+'</td>';
+    html+='<td>'+(g(r,'품종')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'면적(㎡)')||'-')+'</td>';
+    html+='<td>'+(g(r,'생산방법')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'총생산량')||'-')+'</td>';
+    html+='<td class="text-right">'+(g(r,'조직내출하량')||'-')+'</td>';
+    html+='<td class="text-center">'+(g(r,'출하량단위')||'-')+'</td>';
+    html+='<td>'+(g(r,'출하시기')||'-')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('detailPanel').innerHTML=html;document.getElementById('detailOverlay').classList.add('show');
+}
 function closeDetail(){document.getElementById('detailOverlay').classList.remove('show')}
 
 function resetFilters(){document.getElementById('searchInput').value='';document.getElementById('filterCategory').value='';document.getElementById('filterMethod').value='';document.getElementById('filterShipTime').value='';activeDiocese='';document.querySelectorAll('.summary-card').forEach((c,i)=>c.classList.toggle('active',i===0));applyFilters()}
@@ -373,25 +406,22 @@ function renderInsights(){
   const catBgColors={'가공':'f5ede4','과수':'fbe9e9','채소':'e4f2e9','주잡곡':'f5f0dc','축산':'f0e8f5','수산':'e0f0f5','기타':'f0f0f0'};
   const catOrder2=['채소','가공','주잡곡','과수','축산','수산','기타'];
   
-  html+='<div class="insight-section"><div class="insight-title">품목분류별 생산품목</div><div class="insight-desc">각 품목분류에 속하는 대표 생산품목. 숫자는 해당 품목의 등록 건수입니다.</div>';
+  html+='<div class="insight-section"><div class="insight-title">품목분류별 생산품목</div><div class="insight-desc">각 품목분류에 속하는 생산품목. 숫자는 등록 건수. 클릭하면 해당 품목의 생산자를 볼 수 있습니다.</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">';
   
   catOrder2.forEach(cat=>{
     if(!catProducts[cat])return;
     const items=Object.entries(catProducts[cat]).sort((a,b)=>b[1]-a[1]);
     const total=catCounts[cat];
-    const topItems=items.slice(0,12);
-    const rest=items.length-12;
     
     html+='<div style="background:#'+catBgColors[cat]+';border-radius:10px;padding:14px 16px">';
     html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
     html+='<span style="font-weight:600;font-size:14px;color:#'+catColors2[cat]+'">'+cat+'</span>';
     html+='<span style="font-size:12px;color:#'+catColors2[cat]+';opacity:0.7">'+total+'건 · '+items.length+'종</span></div>';
     html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
-    topItems.forEach(([name,cnt])=>{
-      html+='<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(255,255,255,0.6);color:#'+catColors2[cat]+'">'+name+' <b>'+cnt+'</b></span>';
+    items.forEach(([name,cnt])=>{
+      html+='<span onclick="showProductDetail(\''+name.replace(/'/g,"\\'")+'\',\''+cat+'\')" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(255,255,255,0.6);color:#'+catColors2[cat]+';cursor:pointer;transition:all .1s" onmouseover="this.style.background=\'rgba(255,255,255,0.9)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.6)\'">'+name+' <b>'+cnt+'</b></span>';
     });
-    if(rest>0)html+='<span style="font-size:11px;color:#'+catColors2[cat]+';opacity:0.6;padding:2px 4px">외 '+rest+'종</span>';
     html+='</div></div>';
   });
   html+='</div></div>';
