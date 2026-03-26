@@ -25,8 +25,8 @@
 .view-tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--surface-alt);border-radius:10px;padding:3px;width:fit-content}.view-tab{padding:7px 16px;border-radius:8px;font-size:12px;font-family:inherit;border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-weight:500;transition:all .15s}.view-tab.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .loading{text-align:center;padding:60px 20px}.loading-spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.loading-text{font-size:14px;color:var(--text-muted);margin-top:12px}.error-box{background:#fbe9e9;border:1px solid #e8b4b4;border-radius:10px;padding:16px 20px;color:#8b3a3a;font-size:13px}
 .footer{text-align:center;font-size:11px;color:var(--text-light);padding:20px}
-.btn-download{position:absolute;top:20px;right:24px;display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:1px solid var(--accent);border-radius:8px;font-size:13px;font-family:inherit;font-weight:600;background:var(--accent);color:#fff;cursor:pointer;text-decoration:none;transition:all .15s}.btn-download:hover{background:var(--accent-mid);border-color:var(--accent-mid)}.btn-download::before{content:"\2B07";font-size:14px}
-@media(max-width:768px){.container{padding:12px}.header{padding:20px}.header h1{font-size:18px}.toolbar{padding:12px}.summary-row{grid-template-columns:repeat(3,1fr)}.btn-download{position:static;margin-top:12px;display:inline-flex}}
+.btn-download{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:1px solid var(--accent);border-radius:8px;font-size:13px;font-family:inherit;font-weight:600;background:var(--accent);color:#fff;cursor:pointer;text-decoration:none;transition:all .15s}.btn-download:hover{background:var(--accent-mid);border-color:var(--accent-mid)}.btn-download::before{content:"\2B07";font-size:14px}
+@media(max-width:768px){.container{padding:12px}.header{padding:20px}.header h1{font-size:18px}.toolbar{padding:12px}.summary-row{grid-template-columns:repeat(3,1fr)}}
 .insight-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:16px}
 .insight-title{font-size:16px;font-weight:600;color:var(--accent);margin-bottom:4px}
 .insight-desc{font-size:12px;color:var(--text-muted);margin-bottom:16px}
@@ -62,8 +62,7 @@
 </head>
 <body>
 <div class="container">
-  <div class="header" style="position:relative">
-    <a class="btn-download" href="https://docs.google.com/spreadsheets/d/17LP8pPfp-wqTGktaOiuN0nuU6F8yNgxs/export?format=xlsx" target="_blank">엑셀 다운로드</a>
+  <div class="header">
     <h1>2026년 가톨릭농민회 생산계획 종합 대시보드 <span class="live-badge"><span class="live-dot"></span>실시간 연동</span></h1>
     <div class="header-sub">9개 교구 생산계획서 통합 · 생산소비실무자회의 · 구글 시트 실시간 연동</div>
     <div class="header-meta">
@@ -80,6 +79,7 @@
     </div>
     <div class="last-update" id="lastUpdate"></div>
   </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><a class="btn-download" href="https://docs.google.com/spreadsheets/d/17LP8pPfp-wqTGktaOiuN0nuU6F8yNgxs/export?format=xlsx" target="_blank">엑셀 다운로드</a></div>
   <div class="summary-row" id="summaryRow"></div>
   <div class="view-tabs">
     <button class="view-tab active" onclick="setView('table')">데이터 테이블</button>
