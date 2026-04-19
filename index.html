@@ -121,6 +121,7 @@
     <div class="toolbar">
       <div class="search-box"><input type="text" id="producerSearch" placeholder="생산자 이름 검색..." oninput="filterProducers()"></div>
       <select class="filter-select" id="producerDiocese" onchange="filterProducers()"><option value="">교구 전체</option></select>
+      <select class="filter-select" id="producerRepCat" onchange="filterProducers()"><option value="">대표품목 전체</option><option value="주잡곡">주잡곡</option><option value="채소">채소</option><option value="과수">과수</option><option value="축산">축산</option><option value="수산">수산</option><option value="가공">가공</option></select>
       <span class="result-count" id="producerCount"></span>
     </div>
     <div id="producerList"></div>
@@ -263,7 +264,7 @@ function showDetail(diocese,name){
   html+='<div class="sub"><span class="diocese-dot dot-'+diocese+'"></span>'+diocese+'교구 '+g(r,'분회')+'분회 · '+pid+' · '+items.length+'품목 ('+catStr+')</div>';
 
   // Profile section
-  const pfFields=['연락처','주소','이메일','영농경력','주요인증','특이사항'];
+  const pfFields=['대표품목','연락처','주소','이메일','영농경력','주요인증','특이사항'];
   const hasPf=pfFields.some(f=>g(pf,f));
   html+='<div class="profile-section"><div class="pf-title">생산자 정보'+(hasPf?'':'  (미입력)')+'</div><div class="pf-grid">';
   pfFields.forEach(f=>{const v=g(pf,f);html+='<span class="pf-label">'+f+'</span><span class="'+(v?'':'pf-empty')+'">'+(v||'추후 입력 예정')+'</span>'});
@@ -396,15 +397,17 @@ function renderProducers(){
   const q=(document.getElementById('producerSearch').value||'').trim().toLowerCase();
   const diocese=document.getElementById('producerDiocese').value;
   const producers={};
-  DATA.forEach(r=>{const key=g(r,'교구')+'_'+g(r,'이름');if(!producers[key])producers[key]={id:g(r,'생산자ID'),교구:g(r,'교구'),분회:g(r,'분회'),이름:g(r,'이름'),items:[],methods:new Set(),cats:{}};producers[key].items.push(r);const m=g(r,'생산방법');if(m)producers[key].methods.add(normMethod(m));const c=normCat(g(r,'품목별'));if(c)producers[key].cats[c]=(producers[key].cats[c]||0)+1});
+  DATA.forEach(r=>{const key=g(r,'교구')+'_'+g(r,'이름');if(!producers[key])producers[key]={id:g(r,'생산자ID'),교구:g(r,'교구'),분회:g(r,'분회'),이름:g(r,'이름'),items:[],methods:new Set(),cats:{},대표품목:g(PROFILES[g(r,'생산자ID')]||{},'대표품목')};producers[key].items.push(r);const m=g(r,'생산방법');if(m)producers[key].methods.add(normMethod(m));const c=normCat(g(r,'품목별'));if(c)producers[key].cats[c]=(producers[key].cats[c]||0)+1});
   let list=Object.values(producers);
   if(diocese)list=list.filter(p=>p.교구===diocese);
+  const repCat=document.getElementById('producerRepCat').value;
+  if(repCat)list=list.filter(p=>p.대표품목===repCat);
   if(q)list=list.filter(p=>(p.이름+p.분회+p.items.map(i=>g(i,'생산품목')).join(' ')).toLowerCase().includes(q));
   document.getElementById('producerCount').textContent=list.length+'명';
   let html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px">';
   list.forEach(p=>{const catBadges=Object.entries(p.cats).map(([k,v])=>'<span class="cat-badge cat-'+k+'">'+k+' '+v+'</span>').join(' ');const products=p.items.map(i=>g(i,'생산품목')).filter(Boolean).slice(0,6).join(', ');const more=p.items.length>6?' 외 '+(p.items.length-6)+'건':'';const pf=PROFILES[p.id]||{};const hasInfo=g(pf,'연락처')||g(pf,'주소');
     html+='<div class="summary-card" style="text-align:left;padding:16px;cursor:pointer" onclick="showDetail(\''+p.교구+'\',\''+p.이름.replace(/'/g,"\\'")+'\')">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:start"><div><div class="diocese" style="font-size:15px"><span class="diocese-dot dot-'+p.교구+'"></span>'+p.이름+'</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+p.교구+' '+p.분회+' · '+p.id+(hasInfo?' · 상세정보 있음':'')+'</div></div><div style="font-size:18px;font-weight:600;color:var(--accent)">'+p.items.length+'<span style="font-size:11px;font-weight:400;color:var(--text-muted)"> 품목</span></div></div>';
+    html+='<div style="display:flex;justify-content:space-between;align-items:start"><div><div class="diocese" style="font-size:15px"><span class="diocese-dot dot-'+p.교구+'"></span>'+p.이름+(p.대표품목?' <span class="cat-badge cat-'+p.대표품목+'" style="font-size:10px;vertical-align:middle">대표: '+p.대표품목+'</span>':'')+'</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+p.교구+' '+p.분회+' · '+p.id+(hasInfo?' · 상세정보 있음':'')+'</div></div><div style="font-size:18px;font-weight:600;color:var(--accent)">'+p.items.length+'<span style="font-size:11px;font-weight:400;color:var(--text-muted)"> 품목</span></div></div>';
     html+='<div style="margin-top:10px;display:flex;gap:4px;flex-wrap:wrap">'+catBadges+'</div>';
     html+='<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">'+products+more+'</div>';
     html+='<div style="margin-top:6px;font-size:11px;color:var(--text-light)">'+(p.methods.size?[...p.methods].join(', '):'')+'</div></div>'});
